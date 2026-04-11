@@ -11,7 +11,7 @@ EPOCHS = 10
 
 def main():
     if not os.path.exists(DATASET_DIR):
-        print("khong tim thay thu muc dataset")
+        print("Không tìm thấy thư mục dataset")
         return
     
     train_ds = tf.keras.utils.image_dataset_from_directory(
@@ -39,7 +39,7 @@ def main():
     model.fit(train_ds, epochs=EPOCHS)
 
     model.save(MODEL_PATH)
-    print("da luu mo hinh vao:", MODEL_PATH)
+    print("Đã lưu mô hình vào:", MODEL_PATH)
 if __name__ == "__main__":
     main()
     
