@@ -3,6 +3,8 @@ import numpy as np
 import tensorflow as tf
 import os
 
+from fuzzy.fuzzy import fuzzy_rules
+
 MODEL_PATH = 'cnn/cnn_model.h5'
 IMG_SIZE = (128, 128)
 
