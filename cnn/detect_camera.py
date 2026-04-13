@@ -35,16 +35,6 @@ def preprocess(frame):
     img = np.expand_dims(img, axis=0)
     return img
 
-def get_level(score):
-    if score < 0.5:
-        return "Không có vết bẩn"
-    elif score < 0.75:
-        return "Vết bẩn nhẹ"
-    elif score < 0.9:
-        return "Vết bẩn trung bình"
-    else:
-        return "Vết bẩn nặng"
-
 def detect():
     model = load_model()
 
@@ -54,6 +44,15 @@ def detect():
     if not cap.isOpened():
         print("Không thể mở Camera:", name)
         return
+    
+    class_names = ['mold_stains', 'mud_stains', 'oil_stains', 'yellow_stains']
+
+    label_names_vn = {
+        'mold_stains': 'Vết bẩn mốc',
+        'mud_stains': 'Vết bẩn bùn đất',
+        'oil_stains': 'Vết bẩn dầu mỡ',
+        'yellow_stains': 'Vết bẩn ố vàng'
+    }
 
     while True:
         ret, frame = cap.read()
@@ -61,24 +60,28 @@ def detect():
             break
         
         img = preprocess(frame)
-        pred = model.predict(img)[0][0]
+        pred = model.predict(img, verbose=0)[0]
+        class_id = np.argmax(pred)
+        confidence = pred[class_id]
 
-        if pred >= 0.5:
-            label = "Vết bẩn"
-            color = (0, 0, 255)
-            confidence = pred
-        else:
-            label = "Không có vết bẩn"
+        label = class_names[class_id]
+        label_vn = label_names_vn[label]
+        level = fuzzy_rules(confidence)
+
+        if level == "Không có vết bẩn":
             color = (0, 255, 0)
-            confidence = 1 - pred
-        
-        level = get_level(pred)
+        elif level == "Vết bẩn nhẹ":
+            color = (0, 255, 255)
+        elif level == "Vết bẩn trung bình":
+            color = (0, 165, 255)
+        else:
+            color = (0, 0, 255)
 
         #hiện thi chữ
-        cv2.putText(frame, f"Nguồn; {name}", (20, 30),
+        cv2.putText(frame, f"Nguồn: {name}", (20, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
         
-        cv2.putText(frame, f"Kết quả: {label}", (20, 60),
+        cv2.putText(frame, f"Kết quả: {label_vn}", (20, 60),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
         
         cv2.putText(frame, f"Mức độ: {level}", (20, 90),
@@ -88,13 +91,16 @@ def detect():
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
         
         #Viền
-        h, w, _ = frame.shape[:2]
+        h, w = frame.shape[:2]
         cv2.rectangle(frame, (5, 5), (w-5, h-5), color, 3)
 
         cv2.imshow("Nhận diện vết bẩn", frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+    cap.release()
+    cv2.destroyAllWindows()
+    
 def run_camera():
     detect()
 

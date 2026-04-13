@@ -1,8 +1,6 @@
 import numpy as np
 
-# =========================
-# FUZZY MEMBERSHIP
-# =========================
+
 
 def triangular(x, a, b, c):
     if x <= a or x >= c:
@@ -36,9 +34,7 @@ def fuzzy_membership(score):
     }
 
 
-# =========================
-# LUẬT MỜ
-# =========================
+
 
 def fuzzy_rules(score):
     m = fuzzy_membership(score)

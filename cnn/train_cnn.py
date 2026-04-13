@@ -20,6 +20,9 @@ def main():
         batch_size=BATCH_SIZE,
     )
 
+    class_names = train_ds.class_names
+    num_classes = len(class_names)
+
     model = models.Sequential([
         layers.Rescaling(1./255),
 
@@ -28,11 +31,11 @@ def main():
 
         layers.Flatten(),
         layers.Dense(128, activation='relu'),
-        layers.Dense(1, activation='sigmoid')
+        layers.Dense(num_classes, activation='softmax')
     ])
     model.compile(
         optimizer='adam',
-        loss='binary_crossentropy',
+        loss='sparse_categorical_crossentropy',
         metrics=['accuracy']
     )
 
